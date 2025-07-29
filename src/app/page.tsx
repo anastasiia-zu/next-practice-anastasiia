@@ -1,20 +1,23 @@
-import Link from "next/link";
+import prisma from "@/lib/prisma";
+import NewPostForm from "@/components/NewPostForm";
 
-export default function HomePage() {
+export default async function Page() {
+  const posts = await prisma.post.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { author: true },
+  });
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center space-y-6">
-      <h1 className="text-4xl font-bold">Welcome to Vibe App</h1>
-      <div className="space-x-4">
-        <Link href="/login" className="px-4 py-2 bg-purple-500 text-white rounded">
-          Login
-        </Link>
-        <Link href="/register" className="px-4 py-2 bg-pink-500 text-white rounded">
-          Register
-        </Link>
-        <Link href="/feed" className="px-4 py-2 border border-gray-300 rounded">
-          Go to Feed
-        </Link>
-      </div>
-    </main>
+    <section className="max-w-xl mx-auto mt-8">
+      <NewPostForm />
+      {posts.map(post => (
+        <div key={post.id} className="p-4 border rounded bg-purple-100 mb-4">
+          <p className="mb-2">{post.content}</p>
+          <small className="text-gray-600">
+            by {post.author?.username || "Anonymous"}
+          </small>
+        </div>
+      ))}
+    </section>
   );
 }
